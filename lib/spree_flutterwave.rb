@@ -1,3 +1,4 @@
+require 'flutterwave_sdk'
 require 'spree_core'
 require 'spree_extension'
 require 'spree_flutterwave/engine'
