@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 spree_opts = '>= 4.4.0.rc1'
+gem 'deface'
 gem 'flutterwave_sdk', github: 'Flutterwave/Flutterwave-Ruby-v3', branch: 'master'
 gem 'spree', spree_opts
 
