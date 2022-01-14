@@ -1,4 +1,7 @@
-class SpreeFlutterwave::Gateway::FlutterwaveCheckout < ActiveRecord::Base
-  has_one :payment, as: :source, class_name: 'Spree::Payment'
-  has_one :order, through: :payment
+module SpreeFlutterwave
+  class FlutterwaveCheckout < ApplicationRecord
+    has_one :payment, as: :source, class_name: 'Spree::Payment', dependent: :destroy
+    has_one :order, through: :payment, dependent: :destroy
+    belongs_to :payment_method
+  end
 end

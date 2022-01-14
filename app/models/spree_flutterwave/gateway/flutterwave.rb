@@ -10,7 +10,7 @@ module SpreeFlutterwave
       end
 
       def payment_source_class
-        Spree::FlutterwaveCheckout
+        SpreeFlutterwave::FlutterwaveCheckout
       end
 
       def source_required?
