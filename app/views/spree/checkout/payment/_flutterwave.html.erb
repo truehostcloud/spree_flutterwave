@@ -3,13 +3,12 @@
   <% param_prefix = "payment_source[#{payment_method.id}]" %>
 
     <div class="payment-gateway-fields">
-      <%= hidden_field_tag "#{param_prefix}[transaction_id]", '', id: "flw_transaction_id", value: "FLW_DUMMY_TX_ID" %>
+      <%= hidden_field_tag "#{param_prefix}[transaction_id]", '', id: "flw_transaction_id", value: 2151557 %>
       <%= hidden_field_tag "#{param_prefix}[transaction_ref]", '', id: "flw_transaction_ref", value: @order.number %>
       <%= hidden_field_tag "#{param_prefix}[status]", '', id: "flw_status", value: "successful" %>
       <%= hidden_field_tag "#{param_prefix}[payment_method]", '', id: "flw_payment_method" %>
     </div>
 </div>
-<h1><%=Spree::PermittedAttributes.source_attributes%></h1>
 <div id="form-flutterwave">
   <style>
   .btn-flutterwave {
