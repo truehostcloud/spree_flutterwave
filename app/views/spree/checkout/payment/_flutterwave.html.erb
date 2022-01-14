@@ -1,4 +1,16 @@
-<form id="form-flutterwave">
+<div class="payment-gateway">
+
+  <% param_prefix = "payment_source[#{payment_method.id}]" %>
+
+    <div class="payment-gateway-fields">
+      <%= hidden_field_tag "#{param_prefix}[transaction_id]", '', id: "flw_transaction_id", value: "FLW_DUMMY_TX_ID" %>
+      <%= hidden_field_tag "#{param_prefix}[transaction_ref]", '', id: "flw_transaction_ref", value: @order.number %>
+      <%= hidden_field_tag "#{param_prefix}[status]", '', id: "flw_status", value: "successful" %>
+      <%= hidden_field_tag "#{param_prefix}[payment_method]", '', id: "flw_payment_method" %>
+    </div>
+</div>
+<h1><%=Spree::PermittedAttributes.source_attributes%></h1>
+<div id="form-flutterwave">
   <style>
   .btn-flutterwave {
     padding-left: 1.6rem;
@@ -20,8 +32,7 @@
       <span>Pay Now</span>
     </div>
   </button>
-</form>
-<h1><%= current_store.default_country %></h1>
+</div>
 <script>
   const button = document.querySelector("#btn-flutterwave");
 
@@ -31,24 +42,24 @@
     event.preventDefault()
 
     FlutterwaveCheckout({
-      public_key: "FLWPUBK_TEST-SANDBOXDEMOKEY-X",
+      public_key: "<%= payment_method.preferred_public_key %>",
       tx_ref: "<%= @order.number %>",
       amount: "<%= @order.total %>",
       currency: "<%= @order.currency %>",
-      country: "<%= current_store.default_country %>",
-      payment_options: "mpesa",
-      redirect_url: "<%= request.base_url %>/flutterwave/payment",
+      country: "<%= current_store.default_country.iso %>",
       customer: {
         email: "<%= @order.user.email %>"
       },
       callback: function (data) {
-        console.log(data);
+        document.querySelector('#flw_transaction_id').value = data.transaction_id
+        document.querySelector('#flw_transaction_ref').value = data.tx_ref
+        document.querySelector('#flw_status').value = data.status
       },
       onclose: function() {
       },
       customizations: {
         title: "<%= current_store.name %>",
-        logo: "",
+        logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
       },
     });
   }
