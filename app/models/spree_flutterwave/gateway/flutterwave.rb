@@ -17,6 +17,14 @@ module SpreeFlutterwave
         true
       end
 
+      def payment_profiles_supported?
+        true
+      end
+
+      def create_profile(payment)
+        # do something before confirmation
+      end
+
       def provider
         ::Flutterwave.new(preferred_public_key, preferred_secret_key, preferred_encryption_key, 'https://ravesandboxapi.flutterwave.com')
       end
