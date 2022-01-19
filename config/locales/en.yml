@@ -2,6 +2,15 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  hello: "Hello world"
+  activerecord:
+    models:
+      spree_flutterwave/flutterwave_checkout:
+        one: Flutterwave Checkout
+        other: Flutterwave Checkouts
+    attributes:
+      spree_flutterwave/flutterwave_checkout:
+        transaction_id: Transaction Id
+        transaction_ref: Transaction Reference
+        status: Status
   spree:
     invalid_flutterwave_checkout: Invalid Flutterwave Checkout

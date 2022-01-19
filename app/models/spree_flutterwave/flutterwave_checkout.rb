@@ -7,8 +7,8 @@ module SpreeFlutterwave
     has_one :payment, as: :source, class_name: 'Spree::Payment', dependent: :destroy
     has_one :order, through: :payment, dependent: :destroy
     belongs_to :payment_method, class_name: 'Spree::PaymentMethod'
+    belongs_to :user, class_name: 'Spree::User'
 
-    validates :transaction_id, presence: true
     validates :transaction_ref, presence: true
     validates :status, presence: true
   end

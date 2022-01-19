@@ -5,7 +5,7 @@ module Spree
     end
 
     def flutterwave_checkout(order)
-      flutterwave_checkouts.where(transaction_ref: order.number).all
+      flutterwave_checkouts.where(transaction_ref: order.number).last
     end
   end
 end

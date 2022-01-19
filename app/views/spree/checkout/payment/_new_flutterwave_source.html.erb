@@ -39,25 +39,25 @@
         event.preventDefault()
 
         FlutterwaveCheckout({
-        public_key: "<%= payment_method.preferred_public_key %>",
-        tx_ref: "<%= @order.number %>",
-        amount: "<%= @order.total %>",
-        currency: "<%= @order.currency %>",
-        country: "<%= current_store.default_country.iso %>",
-        customer: {
-            email: "<%= @order.user.email %>"
-        },
-        callback: function (data) {
-            document.querySelector('#flw_transaction_id').value = data.transaction_id
-            document.querySelector('#flw_transaction_ref').value = data.tx_ref
-            document.querySelector('#flw_status').value = data.status
-        },
-        onclose: function() {
-        },
-        customizations: {
-            title: "<%= current_store.name %>",
-            logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
-        },
+            public_key: "<%= payment_method.payment_method.preferred_public_key %>",
+            tx_ref: "<%=  %>",
+            amount: "<%= @order.total %>",
+            currency: "<%= @order.currency %>",
+            country: "<%= current_store.default_country.iso %>",
+            customer: {
+                email: "<%= @order.user.email %>"
+            },
+            callback: function (data) {
+                document.querySelector('#flw_transaction_id').value = data.transaction_id
+                document.querySelector('#flw_transaction_ref').value = data.tx_ref
+                document.querySelector('#flw_status').value = data.status
+            },
+            onclose: function() {
+            },
+            customizations: {
+                title: "<%= current_store.name %>",
+                logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
+            },
         });
     }
 </script>

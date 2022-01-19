@@ -7,6 +7,7 @@ module SpreeFlutterwave
         # Set existing card after setting permitted parameters because
         # rails would slice parameters containing ruby objects, apparently
         existing_card_id = @updating_params[:order] ? @updating_params[:order].delete(:existing_card) : nil
+        existing_card_id = flutterwave_checkout? ? nil? : existing_card_id
 
         attributes = if @updating_params[:order]
                        @updating_params[:order].permit(permitted_params).delete_if { |_k, v| v.nil? }
@@ -15,7 +16,7 @@ module SpreeFlutterwave
                      end
 
         if existing_card_id.present?
-          credit_card = CreditCard.find existing_card_id
+          credit_card = ::Spree::CreditCard.find existing_card_id
           raise Core::GatewayError, Spree.t(:invalid_credit_card) if credit_card.user_id != user_id || credit_card.user_id.blank?
 
           credit_card.verification_value = params[:cvc_confirm] if params[:cvc_confirm].present?
@@ -26,20 +27,28 @@ module SpreeFlutterwave
         end
 
         attributes[:payments_attributes].first[:request_env] = request_env if attributes[:payments_attributes]
+        payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
 
         # Flutterwave
-        existing_flutterwave_checkout_id = @updating_params[:order] ? @updating_params[:order].delete(:existing_flutterwave_checkout) : nil
+        if flutterwave_checkout? && payment_attributes.present?
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
 
-        if existing_flutterwave_checkout_id.present?
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.find existing_flutterwave_checkout_id
+          if flutterwave_checkout.nil?
+            flutterwave_checkout_attributes = {
+              payment_method: Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave'),
+              transaction_ref: number,
+              user: user,
+              status: 'incomplete'
+            }
+            flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+            flutterwave_checkout.save
+          end
 
           if flutterwave_checkout.user_id != user_id || flutterwave_checkout.user_id.blank?
             raise Core::GatewayError, Spree.t(:invalid_flutterwave_checkout)
           end
 
-          attributes[:payments_attributes].first[:source] = flutterwave_checkout
-          attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
-          attributes[:payments_attributes].first.delete :source_attributes
+          payment_attributes[:source] = flutterwave_checkout
         end
 
         success = update(attributes)
@@ -49,7 +58,15 @@ module SpreeFlutterwave
       @updating_params = nil
       success
     end
+
+    def flutterwave_checkout?
+      return false if @updating_params[:order][:payments_attributes].nil?
+      return false if @updating_params[:order][:payments_attributes].first[:payment_method_id].nil?
+
+      gateway = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+      gateway.id == @updating_params[:order][:payments_attributes].first[:payment_method_id].to_i
+    end
   end
 end
 
-# ::Spree::Order.prepend(SpreeFlutterwave::OrderDecorator)
+::Spree::Order.prepend(SpreeFlutterwave::OrderDecorator)
