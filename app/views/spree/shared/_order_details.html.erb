@@ -50,7 +50,6 @@
       <% end %>
     </dl>
   </div>
-
   <div class="checkout-confirm-order-details-line-items d-flex flex-column mt-5 mr-md-4">
     <div class="checkout-confirm-order-details-line-items-header d-none d-sm-block d-lg-none align-self-start mb-3">
       <%= Spree.t(:products) %>
@@ -84,11 +83,11 @@
                 <% unless item.variant.is_master? %>
                   <ul class="checkout-confirm-order-details-line-items-line-item-name-options text-uppercase list-unstyled mb-0">
                     <% item.variant.option_values.sort { |ov| ov.option_type.position }.each do |ov| %>
-                    <li>
-                      <% # TODO: rework option values so options_text method can be used here %>
-                      <%= "#{ov.option_type.presentation}: #{ov.name.titleize}" %>
-                    </li>
-                  <% end %>
+                      <li>
+                        <% # TODO: rework option values so options_text method can be used here %>
+                        <%= "#{ov.option_type.presentation}: #{ov.name.titleize}" %>
+                      </li>
+                    <% end %>
                   </ul>
                 <% end %>
                 <div class="d-lg-none" data-hook="order_item_price">
@@ -117,35 +116,42 @@
   <div class="mt-5" id="checkout-summary" data-hook="checkout_summary_box">
     <%= render partial: 'spree/checkout/summary', locals: { order: @order } %>
     <% unless @order.uneditable? %>
+      <div data-hook="buttons">
+        <% submit_label_key = @order.confirm? ? :place_order : :save_and_continue %>
+        <%= submit_tag Spree.t(submit_label_key), id: 'btn-flutterwave', class: 'btn btn-primary text-uppercase font-weight-bold w-100 checkout-content-save-continue-button' %>
+      </div>
+      <% if flutterwave_chosen? %>
         <script src="https://checkout.flutterwave.com/v3.js"></script>
-        <div data-hook="buttons">
-            <% submit_label_key = @order.confirm? ? :place_order : :save_and_continue %>
-            <%= submit_tag Spree.t(submit_label_key), id: 'btn-flutterwave', class: 'btn btn-primary text-uppercase font-weight-bold w-100 checkout-content-save-continue-button' %>
-        </div>
         <script>
-            const button = document.querySelector("#btn-flutterwave");
+          const button = document.querySelector("#btn-flutterwave");
 
-            button.addEventListener("click", makePayment)
+          button.addEventListener("click", makePayment)
 
-            function makePayment(event) {
-                event.preventDefault()
+          const formData = new FormData(document.querySelector('#checkout_form_confirm'));
+          const formDataAsJson = Object.fromEntries(formData)
 
-                FlutterwaveCheckout({
-                    public_key: "<%= @flutterwave_payment_source&.payment_method.preferred_public_key %>",
-                    tx_ref: "<%= @order.number  %>",
-                    amount: "<%= @order.total %>",
-                    currency: "<%= @order.currency %>",
-                    country: "<%= current_store.default_country.iso %>",
-                    customer: {
-                        email: "<%= @order.user.email %>"
-                    },
-                    customizations: {
-                        title: "<%= current_store.name %>",
-                        logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
-                    },
-                });
-            }
+          function makePayment(event) {
+              event.preventDefault()
+
+              FlutterwaveCheckout({
+                  public_key: "<%= @flutterwave_payment_method.preferred_public_key %>",
+                  tx_ref: "<%= @order.number  %>",
+                  amount: "<%= @order.total %>",
+                  currency: "<%= @order.currency %>",
+                  country: "<%= current_store.default_country.iso %>",
+                  customer: {
+                      email: "<%= @order.user.email %>",
+                  },
+                  customizations: {
+                      title: "<%= current_store.name %>",
+                      logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
+                  },
+                  meta: formDataAsJson,
+                  redirect_url: "<%= current_store.url %>/flutterwave/callback"
+              });
+          }
         </script>
+      <% end %>
     <% end %>
   </div>
 </div>
