@@ -34,13 +34,22 @@ module SpreeFlutterwave
         if flutterwave_checkout? && payment_attributes.present?
           flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
 
-          if flutterwave_checkout.present?
-            if flutterwave_checkout.user_id != user_id || flutterwave_checkout.user_id.blank?
-              raise Core::GatewayError, Spree.t(:invalid_flutterwave_checkout)
-            end
-
-            payment_attributes[:source] = flutterwave_checkout
+          if flutterwave_checkout.nil?
+            flutterwave_checkout_attributes = {
+              payment_method: Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave'),
+              transaction_ref: number,
+              user: user,
+              status: 'incomplete'
+            }
+            flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+            flutterwave_checkout.save
           end
+
+          if flutterwave_checkout.user_id != user_id || flutterwave_checkout.user_id.blank?
+            raise Core::GatewayError, Spree.t(:invalid_flutterwave_checkout)
+          end
+
+          payment_attributes[:source] = flutterwave_checkout
 
         end
 
