@@ -10,6 +10,7 @@ group :test do
 end
 
 group :development do
+  gem 'htmlbeautifier'
   gem 'rcodetools', require: false
   gem 'reek', require: false
   gem 'rubocop', require: false
