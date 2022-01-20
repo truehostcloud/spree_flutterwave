@@ -1,9 +1,0 @@
-<% @flutterwave_payment_sources.each do |checkout| %>
-    <div class="payment-gateway-fields">
-        <%= hidden_field_tag "order[existing_flutterwave_checkout]", value: 1 %>
-    </div>
-<% end %>
-
-<button type="submit" class="btn btn-success btn-lg btn-block">
-    <%= svg_icon name: "tick.svg", width: '20', height: '20' %> Paid
-</button>

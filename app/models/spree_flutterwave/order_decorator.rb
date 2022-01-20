@@ -7,6 +7,7 @@ module SpreeFlutterwave
         # Set existing card after setting permitted parameters because
         # rails would slice parameters containing ruby objects, apparently
         existing_card_id = @updating_params[:order] ? @updating_params[:order].delete(:existing_card) : nil
+        # don't search for card if, flutterwave is selected
         existing_card_id = flutterwave_checkout? ? nil? : existing_card_id
 
         attributes = if @updating_params[:order]
