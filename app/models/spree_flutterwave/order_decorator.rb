@@ -68,6 +68,10 @@ module SpreeFlutterwave
       gateway = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
       gateway.id == @updating_params[:order][:payments_attributes].first[:payment_method_id].to_i
     end
+
+    def valid_payment
+      payments.valid.first
+    end
   end
 end
 
