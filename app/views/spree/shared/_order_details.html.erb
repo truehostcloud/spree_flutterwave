@@ -123,12 +123,31 @@
       <% if flutterwave_chosen? %>
         <script src="https://checkout.flutterwave.com/v3.js"></script>
         <script>
+          <% scheme = ENV['RAILS_ENV'] == 'development' ? 'http://': 'https://' %>
+
+          const CALLBACK_URL = "<%= scheme + current_store.url %>/flutterwave/callback"
+
           const button = document.querySelector("#btn-flutterwave");
 
           button.addEventListener("click", makePayment)
 
-          const formData = new FormData(document.querySelector('#checkout_form_confirm'));
-          const formDataAsJson = Object.fromEntries(formData)
+          function onCallback(data) {
+            fetch(CALLBACK_URL, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then((res) => {
+              console.log(res);
+              button.removeEventListener("click", makePayment)
+              button.click()
+            }).catch((err) => {
+              console.log(err);
+            });
+          }
 
           function makePayment(event) {
               event.preventDefault()
@@ -142,12 +161,12 @@
                   customer: {
                       email: "<%= @order.user.email %>",
                   },
+                  callback: onCallback,
                   customizations: {
                       title: "<%= current_store.name %>",
                       logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
                   },
-                  meta: formDataAsJson,
-                  redirect_url: "<%= current_store.url %>/flutterwave/callback"
+                  payment_options: "account,card,banktransfer,mpesa,mobilemoneyrwanda,mobilemoneyzambia,",
               });
           }
         </script>
