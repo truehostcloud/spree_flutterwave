@@ -121,7 +121,7 @@
         <%= submit_tag Spree.t(submit_label_key), id: 'btn-flutterwave1', class: 'btn btn-primary text-uppercase font-weight-bold w-100 checkout-content-save-continue-button' %>
       </div>
       <% if flutterwave_chosen? %>
-        <%= hidden_field_tag 'payments_attributes[transaction_id]', 'xxxx', id: 'flw_transaction_id' %>
+        <%= hidden_field_tag 'source_attributes[flw_transaction_id]', '10006789', id: 'flw_transaction_id' %>
         <script src="https://checkout.flutterwave.com/v3.js"></script>
         <script>
           <% scheme = ENV['RAILS_ENV'] == 'development' ? 'http://': 'https://' %>
@@ -145,7 +145,7 @@
             .then((res) => {
               button.removeEventListener("click", makePayment)
               tx_id_input.value = res.transaction_id
-              button.click()
+              // button.click()
             }).catch((err) => {
               console.log(err);
             });

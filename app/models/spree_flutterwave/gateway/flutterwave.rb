@@ -1,3 +1,4 @@
+require_relative 'flutterwave_response'
 module SpreeFlutterwave
   module Gateway
     class Flutterwave < Spree::Gateway
@@ -21,6 +22,10 @@ module SpreeFlutterwave
         true
       end
 
+      def auto_capture?
+        true
+      end
+
       def create_profile(payment)
         payment
       end
@@ -29,16 +34,19 @@ module SpreeFlutterwave
         source.instance_of?(payment_source_class)
       end
 
-      def capture(_money_in_cents, _source, _gateway_options)
-        raise Exception, 'Capture'
+      def purchase(_money_in_cents, source, _gateway_options)
+        ActiveMerchant::Billing::Response.new(false, 'Flutterwave: Transaction Id is missing') if source.transaction_id.nil?
+        tx = Transactions.new(provider)
+        begin
+          res = tx.verify_transaction(source.transaction_id)
+          SpreeFlutterwave::Gateway::FlutterwaveResponse.new(res)
+        rescue ::FlutterwaveServerError => e
+          ActiveMerchant::Billing::Response.new(false, 'Flutterwave: XXX', { message: e })
+        end
       end
 
-      def purchase(_money_in_cents, _source, _gateway_options)
-        raise Exception, 'Purchase'
-      end
-
-      def authorize(_money_in_cents, _source, _gateway_options)
-        raise Exception, _gateway_options
+      def authorize(money_in_cents, source, gateway_options)
+        purchase(money_in_cents, source, gateway_options)
       end
 
       def provider
