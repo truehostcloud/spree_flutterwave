@@ -118,9 +118,10 @@
     <% unless @order.uneditable? %>
       <div data-hook="buttons">
         <% submit_label_key = @order.confirm? ? :place_order : :save_and_continue %>
-        <%= submit_tag Spree.t(submit_label_key), id: 'btn-flutterwave', class: 'btn btn-primary text-uppercase font-weight-bold w-100 checkout-content-save-continue-button' %>
+        <%= submit_tag Spree.t(submit_label_key), id: 'btn-flutterwave1', class: 'btn btn-primary text-uppercase font-weight-bold w-100 checkout-content-save-continue-button' %>
       </div>
       <% if flutterwave_chosen? %>
+        <%= hidden_field_tag 'payments_attributes[transaction_id]', 'xxxx', id: 'flw_transaction_id' %>
         <script src="https://checkout.flutterwave.com/v3.js"></script>
         <script>
           <% scheme = ENV['RAILS_ENV'] == 'development' ? 'http://': 'https://' %>
@@ -128,6 +129,7 @@
           const CALLBACK_URL = "<%= scheme + current_store.url %>/flutterwave/callback"
 
           const button = document.querySelector("#btn-flutterwave");
+          const tx_id_input = document.querySelector("#flw_transaction_id");
 
           button.addEventListener("click", makePayment)
 
@@ -141,8 +143,8 @@
             })
             .then(res => res.json())
             .then((res) => {
-              console.log(res);
               button.removeEventListener("click", makePayment)
+              tx_id_input.value = res.transaction_id
               button.click()
             }).catch((err) => {
               console.log(err);
@@ -159,7 +161,8 @@
                   currency: "<%= @order.currency %>",
                   country: "<%= current_store.default_country.iso %>",
                   customer: {
-                      email: "<%= @order.user.email %>",
+                      // email: "<%= @order.user.email %>",
+                      email: "spree-1@example.com",
                   },
                   callback: onCallback,
                   customizations: {

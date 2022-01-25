@@ -19,6 +19,10 @@ module Spree
         render json: { message: 'flutterwave transation rescorded successfully' }, status: :ok, content_type: 'application/vnd.api+json'
       end
 
+      def verify
+        
+      end
+
       def render_errors(errors)
         json = if errors.is_a?(ActiveModel::Errors)
                  { error: errors.full_messages.to_sentence, errors: errors.messages }

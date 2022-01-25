@@ -49,9 +49,10 @@ module SpreeFlutterwave
             raise Core::GatewayError, Spree.t(:invalid_flutterwave_checkout)
           end
 
-          payment_attributes[:source] = flutterwave_checkout
+          payment_attributes[:transaction_id] ||= payment_attributes[:transaction_id]
 
         end
+        # raise Exception, params
 
         success = update(attributes)
         set_shipments_cost if shipments.any?

@@ -14,20 +14,31 @@ module SpreeFlutterwave
       end
 
       def source_required?
-        false
+        true
       end
 
       def payment_profiles_supported?
         true
       end
 
-      # Flutterwave doesn't support authorization for all payment methods e.g. mpesa
-      def auto_capture?
-        true
-      end
-
       def create_profile(payment)
         payment
+      end
+
+      def supports?(source)
+        source.instance_of?(payment_source_class)
+      end
+
+      def capture(_money_in_cents, _source, _gateway_options)
+        raise Exception, 'Capture'
+      end
+
+      def purchase(_money_in_cents, _source, _gateway_options)
+        raise Exception, 'Purchase'
+      end
+
+      def authorize(_money_in_cents, _source, _gateway_options)
+        raise Exception, _gateway_options
       end
 
       def provider
@@ -36,44 +47,6 @@ module SpreeFlutterwave
 
       def provider_class
         ::Flutterwave
-      end
-
-      def http
-        uri = URI(provider.url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = true
-        http
-      end
-
-      def authorize(_money_in_cents, _source, _gateway_options)
-        # uri = URI(provider.url)
-        # uri_path = "#{uri.path}/payments"
-        # headers = { 'Content-Type' => 'application/json', 'Authorization' => "Bearer #{preferred_secret_key}" }
-        # req = Net::HTTP::Post.new(uri_path, headers)
-
-        # payload = {
-        #   'card_number' => '5531886652142950',
-        #   'cvv' => '564',
-        #   'expiry_month' => '09',
-        #   'expiry_year' => '22',
-        #   'currency' => 'NGN',
-        #   'amount' => '10',
-        #   'email' => 'xxxxxxxxxx@gmail.com',
-        #   'fullname' => 'Test Name',
-        #   'tx_ref' => 'MC-3243e-if-12',
-        #   'redirect_url' => 'https://webhook.site/399'
-        # }
-
-        # res = http.request(req, payload.to_json)
-
-        # json = JSON.parse(res.body)
-
-        # respond_to json['data']['link']
-
-        # tx = Transactions.new(provider)
-        # # tx.verify_transaction(source.transaction_id)
-        ActiveMerchant::Billing::Response.new(true, 'Flutterwave Gateway: Forced Success', { message: 'Flutterwave Gateway: Forced success' },
-                                              test: true)
       end
     end
   end
