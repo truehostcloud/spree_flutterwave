@@ -29,7 +29,7 @@ module SpreeFlutterwave
       end
 
       def provider
-        ::Flutterwave.new(preferred_public_key, preferred_secret_key, preferred_encryption_key, true)
+        ::Flutterwave.new(preferred_public_key, preferred_secret_key, preferred_encryption_key, production?)
       end
 
       def provider_class
@@ -75,6 +75,10 @@ module SpreeFlutterwave
         body = JSON.parse error.response.body, symbolize_names: true
         message = "Flutterwave Error: #{body[:message]}"
         ActiveMerchant::Billing::Response.new(false, message)
+      end
+
+      def production?
+        !preferred_test_mode
       end
     end
   end
