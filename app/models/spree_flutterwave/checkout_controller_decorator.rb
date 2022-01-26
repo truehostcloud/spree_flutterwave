@@ -10,7 +10,9 @@ module SpreeFlutterwave
     end
 
     def flutterwave_chosen?
-      @order.valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave'
+      return @order.valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' if @order.valid_payment.present?
+
+      false
     end
   end
 end

@@ -73,17 +73,24 @@ module SpreeFlutterwave
 
     def flutterwave_checkout?
       return valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' if valid_payment
+      return false if @updating_params.nil?
 
       payment_attributes = @updating_params[:order][:payments_attributes]
       return false if payment_attributes.nil?
       return false if payment_attributes.first[:payment_method_id].nil?
 
       gateway = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
-      gateway.id == @updating_params[:order][:payments_attributes].first[:payment_method_id].to_i
+      gateway.id == payment_attributes.first[:payment_method_id].to_i
     end
 
     def valid_payment
       payments.valid.first
+    end
+
+    def confirmation_required?
+      return true if flutterwave_checkout?
+
+      super
     end
   end
 end
