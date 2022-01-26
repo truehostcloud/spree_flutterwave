@@ -135,6 +135,7 @@
 
           function onCallback(data) {
               tx_id_input.value = data.transaction_id
+              button.removeEventListener("click", makePayment)
               button.click()
           }
 
