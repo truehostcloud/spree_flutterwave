@@ -45,7 +45,7 @@ module SpreeFlutterwave
 
         tx = Transactions.new(provider)
         begin
-          verify(tx, source)
+          res = verify(tx, source)
           SpreeFlutterwave::Gateway::FlutterwaveResponse.new(res)
         rescue ::FlutterwaveServerError => e
           handle_flutterwave_api_errors(e)
@@ -57,14 +57,13 @@ module SpreeFlutterwave
       private
 
       def verify(transaction, source)
-        raise SpreeFlutterwave::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder unless false
-
         res = transaction.verify_transaction(source.transaction_id)
         body = JSON.parse res.body, symbolize_names: true
         tx_ref = body[:data][:tx_ref]
-        raise SpreeFlutterwave::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder unless tx_ref == source.transaction_id
+        raise SpreeFlutterwave::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder unless tx_ref == source.transaction_ref
 
         mark_source_as_verified(source)
+        res
       end
 
       def mark_source_as_verified(source)
