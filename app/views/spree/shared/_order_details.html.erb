@@ -149,7 +149,7 @@
                   currency: "<%= @order.currency %>",
                   country: "<%= current_store.default_country.iso %>",
                   customer: {
-                      email: "<%= @order.user.email %>",
+                      email: "<%= @order.email %>",
                   },
                   callback: onCallback,
                   customizations: {

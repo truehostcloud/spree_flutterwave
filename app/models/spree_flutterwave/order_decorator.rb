@@ -28,10 +28,11 @@ module SpreeFlutterwave
         end
 
         attributes[:payments_attributes].first[:request_env] = request_env if attributes[:payments_attributes]
+
+        # Flutterwave Source and user present
         payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
 
-        # Flutterwave Source
-        if flutterwave_checkout? && payment_attributes.present?
+        if flutterwave_checkout? && user.present? && payment_attributes.present?
           flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
 
           if flutterwave_checkout.nil?
@@ -45,8 +46,23 @@ module SpreeFlutterwave
             flutterwave_checkout.save
           end
 
-          if flutterwave_checkout.user_id != user_id || flutterwave_checkout.user_id.blank?
-            raise Core::GatewayError, Spree.t(:invalid_flutterwave_checkout)
+          attributes[:payments_attributes].first[:source] = flutterwave_checkout
+          attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
+          attributes[:payments_attributes].first.delete :source_attributes
+        end
+
+        # Flutterwave Source and user nill
+        if flutterwave_checkout? && user.nil? && payment_attributes.present?
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
+
+          if flutterwave_checkout.nil?
+            flutterwave_checkout_attributes = {
+              payment_method: Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave'),
+              transaction_ref: number,
+              status: 'pending'
+            }
+            flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+            flutterwave_checkout.save
           end
 
           attributes[:payments_attributes].first[:source] = flutterwave_checkout
@@ -80,6 +96,8 @@ module SpreeFlutterwave
       return false if payment_attributes.first[:payment_method_id].nil?
 
       gateway = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+      return false if gateway.nil?
+
       gateway.id == payment_attributes.first[:payment_method_id].to_i
     end
 
