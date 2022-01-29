@@ -20,9 +20,11 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
+  spree_version = '>= 4.4.0'
   s.add_dependency 'flutterwave_sdk'
   s.add_dependency 'httparty'
-  s.add_dependency 'spree', '>= 4.4.0.rc1'
+  s.add_dependency 'spree', spree_version
+  s.add_dependency 'spree_backend', spree_version
   s.add_dependency 'spree_extension'
 
   s.add_development_dependency 'spree_dev_tools'

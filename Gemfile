@@ -1,9 +1,10 @@
 source 'https://rubygems.org'
 
-spree_opts = '>= 4.4.0.rc1'
+spree_opts = '>= 4.4.0'
 gem 'deface'
 gem 'flutterwave_sdk', github: 'Flutterwave/Flutterwave-Ruby-v3', branch: 'master'
 gem 'spree', spree_opts
+gem 'spree_backend', spree_opts
 
 group :test do
   gem 'rails-controller-testing'
