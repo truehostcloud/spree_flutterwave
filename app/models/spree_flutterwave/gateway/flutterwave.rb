@@ -62,12 +62,24 @@ module SpreeFlutterwave
         tx_ref = body[:data][:tx_ref]
         raise SpreeFlutterwave::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder unless tx_ref == source.transaction_ref
 
-        mark_source_as_verified(source)
+        mark_source_as_verified(source, res)
         res
       end
 
-      def mark_source_as_verified(source)
-        source.status = 'verified'
+      def mark_source_as_verified(source, res)
+        body = JSON.parse res.body, symbolize_names: true
+
+        source.currency = body[:data][:currency]
+        source.amount = body[:data][:amount]
+        source.charged_amount = body[:data][:charged_amount]
+        source.app_fee = body[:data][:app_fee]
+        source.merchant_fee = body[:data][:merchant_fee]
+        source.amount_settled = body[:data][:amount_settled]
+        source.payment_type = body[:data][:payment_type]
+        source.auth_model = body[:data][:auth_model]
+        source.narration = body[:data][:narration]
+        source.status = body[:data][:status]
+        source.raw_response = res
         source.save
       end
 

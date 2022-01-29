@@ -2,15 +2,17 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  activerecord:
-    models:
-      spree_flutterwave/flutterwave_checkout:
-        one: Flutterwave Checkout
-        other: Flutterwave Checkouts
-    attributes:
-      spree_flutterwave/flutterwave_checkout:
-        transaction_id: Transaction Id
-        transaction_ref: Transaction Reference
-        status: Status
   spree:
     invalid_flutterwave_checkout: Invalid Flutterwave Checkout
+    flutterwave: Flutterwave
+    flw_transaction_id: Transaction Id
+    flw_transaction_ref: Transaction Reference
+    flw_currency: Currency
+    flw_amount: Amount
+    flw_charged_amount: Charged Amount
+    flw_app_fee: App Fee
+    flw_merchant_fee: Merchant Fee
+    flw_amount_settled: Amount Settled
+    flw_auth_model: Auth Model
+    flw_narration: Narration
+    flw_payment_type: Payment Type
