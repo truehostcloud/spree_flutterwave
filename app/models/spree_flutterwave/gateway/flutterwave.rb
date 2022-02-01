@@ -54,10 +54,6 @@ module SpreeFlutterwave
         end
       end
 
-      def failure
-        raise Exception, 'VV'
-      end
-
       private
 
       def verify(transaction, source)
