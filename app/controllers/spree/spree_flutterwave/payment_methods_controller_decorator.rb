@@ -1,10 +1,11 @@
 module SpreeFlutterwave
   module PaymentMethodsControllerDecorator
     def create
-      @payment_method = params[:payment_method].delete(:type).constantize.new(payment_method_params)
+      payment_method_type = params[:payment_method].delete(:type)
+      @payment_method = payment_method_type.constantize.new(payment_method_params)
       @object = @payment_method
       set_current_store
-      @payment_method.display_on = 'front_end' if params[:payment_method].delete(:type) == 'SpreeFlutterwave::Gateway::Flutterwave'
+      @payment_method.display_on = 'front_end' if payment_method_type == 'SpreeFlutterwave::Gateway::Flutterwave'
       invoke_callbacks(:create, :before)
       if @payment_method.save
         invoke_callbacks(:create, :after)
@@ -32,7 +33,7 @@ module SpreeFlutterwave
         attributes.delete(k) if k.include?('password') && attributes[k].blank?
       end
 
-      attributes[:display_on] = 'front_end'
+      attributes[:display_on] = 'front_end' if payment_method_type == 'SpreeFlutterwave::Gateway::Flutterwave'
 
       if @payment_method.update(attributes)
         set_current_store
