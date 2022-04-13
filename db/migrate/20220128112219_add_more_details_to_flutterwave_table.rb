@@ -11,6 +11,6 @@ class AddMoreDetailsToFlutterwaveTable < ActiveRecord::Migration[6.1]
     add_column :spree_flutterwave_checkouts, :auth_model, :string
     add_column :spree_flutterwave_checkouts, :narration, :string
 
-    add_column :spree_flutterwave_checkouts, :raw_Response, :jsonb
+    add_column :spree_flutterwave_checkouts, :raw_response, :json
   end
 end
