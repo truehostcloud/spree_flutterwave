@@ -33,11 +33,12 @@ module SpreeFlutterwave
         payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
 
         if flutterwave_checkout? && user.present? && payment_attributes.present?
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
+          payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
           if flutterwave_checkout.nil?
             flutterwave_checkout_attributes = {
-              payment_method: Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave'),
+              payment_method: payment_method,
               transaction_ref: number,
               user: user,
               status: 'pending'
@@ -45,7 +46,6 @@ module SpreeFlutterwave
             flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
             flutterwave_checkout.save
           end
-
           attributes[:payments_attributes].first[:source] = flutterwave_checkout
           attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
           attributes[:payments_attributes].first.delete :source_attributes
@@ -53,11 +53,12 @@ module SpreeFlutterwave
 
         # Flutterwave Source and user nill
         if flutterwave_checkout? && user.nil? && payment_attributes.present?
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
+          payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
           if flutterwave_checkout.nil?
             flutterwave_checkout_attributes = {
-              payment_method: Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave'),
+              payment_method: payment_method,
               transaction_ref: number,
               status: 'pending'
             }
@@ -82,7 +83,6 @@ module SpreeFlutterwave
         success = update(attributes)
         set_shipments_cost if shipments.any?
       end
-
       @updating_params = nil
       success
     end
@@ -95,7 +95,7 @@ module SpreeFlutterwave
       return false if payment_attributes.nil?
       return false if payment_attributes.first[:payment_method_id].nil?
 
-      gateway = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+      gateway = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
       return false if gateway.nil?
 
       gateway.id == payment_attributes.first[:payment_method_id].to_i
