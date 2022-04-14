@@ -7,7 +7,7 @@ module Spree
       end
 
       def load_flutterave_payment_method
-        @flutterwave_payment_method = Spree::PaymentMethod.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        @flutterwave_payment_method = @order.store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
       end
 
       def flutterwave_chosen?
