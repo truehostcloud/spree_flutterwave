@@ -6,7 +6,6 @@ module Spree
         @payment_method = payment_method_type.constantize.new(payment_method_params)
         @object = @payment_method
         set_current_store
-        @payment_method.display_on = 'front_end' if payment_method_type == 'SpreeFlutterwave::Gateway::Flutterwave'
         invoke_callbacks(:create, :before)
         if @payment_method.save
           invoke_callbacks(:create, :after)
@@ -33,8 +32,6 @@ module Spree
         attributes.each do |k, _v|
           attributes.delete(k) if k.include?('password') && attributes[k].blank?
         end
-
-        attributes[:display_on] = 'front_end' if payment_method_type == 'SpreeFlutterwave::Gateway::Flutterwave'
 
         if @payment_method.update(attributes)
           set_current_store
