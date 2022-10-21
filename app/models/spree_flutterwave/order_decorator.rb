@@ -1,32 +1,25 @@
 module SpreeFlutterwave
   module OrderDecorator
     def update_from_params(params, permitted_params, request_env = {})
+      @updating_params = params
+
+      if flutterwave_checkout?
+        valid_payment.invalidate! if valid_payment.present? && !valid_payment_uses_flutterwave?
+        update_from_params_using_flutterwave(params, permitted_params, request_env)
+      else
+        super(params, permitted_params, request_env)
+      end
+    end
+
+    def update_from_params_using_flutterwave(params, permitted_params, request_env = {})
       success = false
       @updating_params = params
       run_callbacks :updating_from_params do
-        # Set existing card after setting permitted parameters because
-        # rails would slice parameters containing ruby objects, apparently
-        existing_card_id = @updating_params[:order] ? @updating_params[:order].delete(:existing_card) : nil
-        # don't search for card if, flutterwave is selected
-        existing_card_id = flutterwave_checkout? ? nil? : existing_card_id
-
         attributes = if @updating_params[:order]
                        @updating_params[:order].permit(permitted_params).delete_if { |_k, v| v.nil? }
                      else
                        {}
                      end
-
-        if existing_card_id.present?
-          credit_card = ::Spree::CreditCard.find existing_card_id
-          raise Core::GatewayError, Spree.t(:invalid_credit_card) if credit_card.user_id != user_id || credit_card.user_id.blank?
-
-          credit_card.verification_value = params[:cvc_confirm] if params[:cvc_confirm].present?
-
-          attributes[:payments_attributes].first[:source] = credit_card
-          attributes[:payments_attributes].first[:payment_method_id] = credit_card.payment_method_id
-          attributes[:payments_attributes].first.delete :source_attributes
-        end
-
         attributes[:payments_attributes].first[:request_env] = request_env if attributes[:payments_attributes]
 
         # Flutterwave Source and user present
@@ -88,17 +81,17 @@ module SpreeFlutterwave
     end
 
     def flutterwave_checkout?
-      return valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' if valid_payment
-      return false if @updating_params.nil?
+      # Only Rely on valid_payment when::
+      # 1. If updating_params is nil?, which happens during all GET requests.
+      # 2. For all POST requests for all stages other than the `payment` stage
+      if @updating_params.nil? || @updating_params[:state] != 'payment'
+        return valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' unless valid_payment.nil?
 
-      payment_attributes = @updating_params[:order][:payments_attributes]
-      return false if payment_attributes.nil?
-      return false if payment_attributes.first[:payment_method_id].nil?
+        return false
+      end
 
-      gateway = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
-      return false if gateway.nil?
-
-      gateway.id == payment_attributes.first[:payment_method_id].to_i
+      # Use params in the POST request for the `payement` stage.
+      flutterwave_in_payment_attributes?
     end
 
     def valid_payment
@@ -109,6 +102,30 @@ module SpreeFlutterwave
       return true if flutterwave_checkout?
 
       super
+    end
+
+    private
+
+    def flutterwave_gateway
+      store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+    end
+
+    def flutterwave_in_payment_attributes?
+      return false if @updating_params.nil?
+
+      payment_attributes = @updating_params[:order][:payments_attributes]
+      return false if payment_attributes.nil?
+      return false if payment_attributes.first[:payment_method_id].nil?
+
+      return false if flutterwave_gateway.nil?
+
+      flutterwave_gateway.id == payment_attributes.first[:payment_method_id].to_i
+    end
+
+    def valid_payment_uses_flutterwave?
+      return false if valid_payment.nil?
+
+      valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave'
     end
   end
 end
