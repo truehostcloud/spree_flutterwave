@@ -23,55 +23,12 @@ module SpreeFlutterwave
         attributes[:payments_attributes].first[:request_env] = request_env if attributes[:payments_attributes]
 
         # Flutterwave Source and user present
-        payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
-
-        if flutterwave_checkout? && user.present? && payment_attributes.present?
-          payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
-
-          if flutterwave_checkout.nil?
-            flutterwave_checkout_attributes = {
-              payment_method: payment_method,
-              transaction_ref: number,
-              user: user,
-              status: 'pending'
-            }
-            flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
-            flutterwave_checkout.save
-          end
-          attributes[:payments_attributes].first[:source] = flutterwave_checkout
-          attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
-          attributes[:payments_attributes].first.delete :source_attributes
-        end
-
+        attributes = update_payment_with_flutterwave(attributes: attributes)
         # Flutterwave Source and user nill
-        if flutterwave_checkout? && user.nil? && payment_attributes.present?
-          payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
-
-          if flutterwave_checkout.nil?
-            flutterwave_checkout_attributes = {
-              payment_method: payment_method,
-              transaction_ref: number,
-              status: 'pending'
-            }
-            flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
-            flutterwave_checkout.save
-          end
-
-          attributes[:payments_attributes].first[:source] = flutterwave_checkout
-          attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
-          attributes[:payments_attributes].first.delete :source_attributes
-        end
+        attributes = update_payment_with_flutterwave_for_guests(attributes: attributes)
 
         # Flutterwave Transaction
-        source_attributes = params[:source_attributes]
-        if flutterwave_checkout? && source_attributes.present? && source_attributes[:flw_transaction_id]
-          flw_transaction_id = source_attributes[:flw_transaction_id]
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
-          flutterwave_checkout.transaction_id = flw_transaction_id
-          flutterwave_checkout.save
-        end
+        update_flutterwave_with_transaction_id
 
         success = update(attributes)
         set_shipments_cost if shipments.any?
@@ -105,6 +62,62 @@ module SpreeFlutterwave
     end
 
     private
+
+    def update_payment_with_flutterwave(attributes:)
+      payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
+      if flutterwave_checkout? && user.present? && payment_attributes.present?
+        payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
+
+        if flutterwave_checkout.nil?
+          flutterwave_checkout_attributes = {
+            payment_method: payment_method,
+            transaction_ref: number,
+            user: user,
+            status: 'pending'
+          }
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+          flutterwave_checkout.save
+        end
+        attributes[:payments_attributes].first[:source] = flutterwave_checkout
+        attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
+        attributes[:payments_attributes].first.delete :source_attributes
+      end
+      attributes
+    end
+
+    def update_payment_with_flutterwave_for_guests(attributes:)
+      payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
+      if flutterwave_checkout? && user.nil? && payment_attributes.present?
+        payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
+
+        if flutterwave_checkout.nil?
+          flutterwave_checkout_attributes = {
+            payment_method: payment_method,
+            transaction_ref: number,
+            status: 'pending'
+          }
+          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+          flutterwave_checkout.save
+        end
+
+        attributes[:payments_attributes].first[:source] = flutterwave_checkout
+        attributes[:payments_attributes].first[:payment_method_id] = flutterwave_checkout.payment_method_id
+        attributes[:payments_attributes].first.delete :source_attributes
+      end
+      attributes
+    end
+
+    def update_flutterwave_with_transaction_id
+      source_attributes = @updating_params[:source_attributes]
+      if flutterwave_checkout? && source_attributes.present? && source_attributes[:flw_transaction_id]
+        flw_transaction_id = source_attributes[:flw_transaction_id]
+        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
+        flutterwave_checkout.transaction_id = flw_transaction_id
+        flutterwave_checkout.save
+      end
+    end
 
     def flutterwave_gateway
       store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
