@@ -1,0 +1,51 @@
+<fieldset data-hook="flutterwave">
+  <legend><%= Spree.t(:flutterwave) %></legend>
+  <div class="table-responsive border rounded bg-white">
+    <table class="table table-condensed border rounded">
+      <tr>
+        <th width="20%"><%= Spree.t(:flw_transaction_ref) %>:</th>
+        <td><%= payment.source.transaction_ref %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_transaction_id) %>:</th>
+        <td><%= payment.source.transaction_id %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_currency) %>:</th>
+        <td><%= payment.source.currency %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_amount) %>:</th>
+        <td><%= payment.source.amount %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_charged_amount) %>:</th>
+        <td><%= payment.source.charged_amount %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_app_fee) %>:</th>
+        <td><%= payment.source.app_fee %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_merchant_fee) %>:</th>
+        <td><%= payment.source.merchant_fee %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_amount_settled) %>:</th>
+        <td><%= payment.source.amount_settled %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_auth_model) %>:</th>
+        <td><%= payment.source.auth_model %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_payment_type) %>:</th>
+        <td><%= payment.source.payment_type %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:flw_narration) %>:</th>
+        <td><%= payment.source.narration %></td>
+      </tr>
+    </table>
+  </div>
+</fieldset>
