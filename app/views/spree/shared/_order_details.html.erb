@@ -154,7 +154,7 @@
                   callback: onCallback,
                   customizations: {
                       title: "<%= current_store.name %>",
-                      logo: "https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg",
+                      logo: "<%= current_store.logo.attached? ? main_app.url_for(current_store.logo): 'https://olitt.b-cdn.net/static/media/olitt-logo-secondary.de8fee27.svg' %>"
                   },
                   payment_options: "account,card,banktransfer,mpesa,mobilemoneyrwanda,mobilemoneyzambia,",
               });
