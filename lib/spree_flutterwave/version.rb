@@ -1,5 +1,5 @@
 module SpreeFlutterwave
-  VERSION = '0.0.8'.freeze
+  VERSION = '1.0.1'.freeze
 
   module_function
 
