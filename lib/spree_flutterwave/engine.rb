@@ -1,3 +1,5 @@
+require_relative 'configuration'
+
 module SpreeFlutterwave
   class Engine < Rails::Engine
     require 'spree/core'
