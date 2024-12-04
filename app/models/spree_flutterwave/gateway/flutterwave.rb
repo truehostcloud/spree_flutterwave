@@ -1,5 +1,5 @@
-require_dependency 'spree_flutterwave/gateway/flutterwave_response'
-require_dependency 'spree_flutterwave/gateway/flutterwave_errors'
+require_relative 'flutterwave_response'
+require_relative 'flutterwave_errors'
 
 module SpreeFlutterwave
   module Gateway
