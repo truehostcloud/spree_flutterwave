@@ -22,9 +22,5 @@ module SpreeFlutterwave
     end
 
     config.to_prepare(&method(:activate).to_proc)
-
-    initializer 'spree_flutterwave.payment_methods', after: 'spree.register.payment_methods' do |app|
-      app.config.spree.payment_methods << SpreeFlutterwave::Gateway::Flutterwave
-    end
   end
 end
