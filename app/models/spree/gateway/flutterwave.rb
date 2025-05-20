@@ -1,6 +1,3 @@
-require_relative 'flutterwave_response'
-require_relative 'flutterwave_errors'
-
 module Spree
   class Gateway::Flutterwave < Gateway
     preference :public_key, :string
@@ -39,16 +36,20 @@ module Spree
       purchase(money_in_cents, source, gateway_options)
     end
 
+    def did_succeed?(code)
+      [200, 201].include?(code.to_i)
+    end
+
     def purchase(_money_in_cents, source, _gateway_options)
       return ActiveMerchant::Billing::Response.new(false, 'Flutterwave: Transaction Id is missing') if source.transaction_id.nil?
 
       tx = Transactions.new(provider)
       begin
         res = verify(tx, source)
-        Spree::Gateway::FlutterwaveResponse.new(res)
+        ActiveMerchant::Billing::Response.new(did_succeed?(res.code), res.body)
       rescue ::FlutterwaveServerError => e
         handle_flutterwave_api_errors(e)
-      rescue Spree::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder => e
+      rescue Spree::Core::GatewayError => e
         ActiveMerchant::Billing::Response.new(false, e.message)
       end
     end
@@ -59,7 +60,7 @@ module Spree
       res = transaction.verify_transaction(source.transaction_id)
       body = JSON.parse res.body, symbolize_names: true
       tx_ref = body[:data][:tx_ref]
-      raise Spree::Gateway::FlutterwaveErrors::PaymentDoesNotBelongToOrder unless tx_ref == source.transaction_ref
+      raise Spree::Core::GatewayError, 'Flutterwave Error: This order is not associated with the provided Flutterwave transaction. Please contact support.' unless tx_ref == source.transaction_ref
 
       mark_source_as_verified(source, res)
       res
