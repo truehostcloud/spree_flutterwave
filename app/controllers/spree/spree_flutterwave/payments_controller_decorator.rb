@@ -7,7 +7,7 @@ module Spree
           if @payment_method.store_credit?
             Spree::Dependencies.checkout_add_store_credit_service.constantize.call(order: @order)
             payments = @order.payments.store_credits.valid
-          elsif @payment_method.is_a?(::SpreeFlutterwave::Gateway::Flutterwave)
+          elsif @payment_method.is_a?(::Spree::Gateway::Flutterwave)
             @payment ||= @order.payments.build(object_params)
             @payment.save
             payments = [@payment]
@@ -29,7 +29,7 @@ module Spree
             # already complete) then trigger it manually now
             saved_payments.each do |payment|
               if payment.reload.checkout?
-                if payment.payment_method.is_a?(::SpreeFlutterwave::Gateway::Flutterwave) && @order.confirm?
+                if payment.payment_method.is_a?(::Spree::Gateway::Flutterwave) && @order.confirm?
                   payment.process!
                 elsif @order.complete?
                   payment.process!

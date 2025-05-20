@@ -1,4 +1,4 @@
-module SpreeFlutterwave
+module Spree
   module Gateway
     class FlutterwaveResponse < ActiveMerchant::Billing::Response
       def initialize(httparty_response)

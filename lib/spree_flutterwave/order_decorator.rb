@@ -42,7 +42,7 @@ module SpreeFlutterwave
       # 1. If updating_params is nil?, which happens during all GET requests.
       # 2. For all POST requests for all stages other than the `payment` stage
       if @updating_params.nil? || @updating_params[:state] != 'payment'
-        return valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' unless valid_payment.nil?
+        return valid_payment.payment_method.type == 'Spree::Gateway::Flutterwave' unless valid_payment.nil?
 
         return false
       end
@@ -66,7 +66,7 @@ module SpreeFlutterwave
     def update_payment_with_flutterwave(attributes:)
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.present? && payment_attributes.present?
-        payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
         flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
@@ -89,7 +89,7 @@ module SpreeFlutterwave
     def update_payment_with_flutterwave_for_guests(attributes:)
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.nil? && payment_attributes.present?
-        payment_method = store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
         flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
@@ -120,7 +120,7 @@ module SpreeFlutterwave
     end
 
     def flutterwave_gateway
-      store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+      store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
     end
 
     def flutterwave_in_payment_attributes?
@@ -138,7 +138,7 @@ module SpreeFlutterwave
     def valid_payment_uses_flutterwave?
       return false if valid_payment.nil?
 
-      valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave'
+      valid_payment.payment_method.type == 'Spree::Gateway::Flutterwave'
     end
   end
 end

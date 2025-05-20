@@ -1,5 +1,5 @@
 module Spree
-  module SpreeFlutterwave
+  module Flutterwave
     module CheckoutControllerDecorator
       def self.prepended(base)
         base.before_action :load_flutterave_payment_method
@@ -7,11 +7,11 @@ module Spree
       end
 
       def load_flutterave_payment_method
-        @flutterwave_payment_method = @order.store.payment_methods.find_by(type: 'SpreeFlutterwave::Gateway::Flutterwave')
+        @flutterwave_payment_method = @order.store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
       end
 
       def flutterwave_chosen?
-        return @order.valid_payment.payment_method.type == 'SpreeFlutterwave::Gateway::Flutterwave' if @order.valid_payment.present?
+        return @order.valid_payment.payment_method.type == 'Spree::Gateway::Flutterwave' if @order.valid_payment.present?
 
         false
       end
@@ -19,4 +19,4 @@ module Spree
   end
 end
 
-::Spree::CheckoutController.prepend(::Spree::SpreeFlutterwave::CheckoutControllerDecorator)
+::Spree::CheckoutController.prepend(::Spree::Flutterwave::CheckoutControllerDecorator)

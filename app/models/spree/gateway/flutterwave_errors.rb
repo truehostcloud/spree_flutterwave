@@ -1,4 +1,4 @@
-module SpreeFlutterwave
+module Spree
   module Gateway
     module FlutterwaveErrors
       class PaymentDoesNotBelongToOrder < StandardError
