@@ -6,6 +6,10 @@ module SpreeFlutterwave
     isolate_namespace Spree
     engine_name 'spree_flutterwave'
 
+    config.after_initialize do |app|
+      app.config.spree.payment_methods << Spree::Gateway::Flutterwave
+    end
+
     # use rspec for tests
     config.generators do |g|
       g.test_framework :rspec
