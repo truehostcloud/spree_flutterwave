@@ -67,7 +67,7 @@ module SpreeFlutterwave
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.present? && payment_attributes.present?
         payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
-        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
+        flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
           flutterwave_checkout_attributes = {
@@ -76,7 +76,7 @@ module SpreeFlutterwave
             user: user,
             status: 'pending'
           }
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+          flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
           flutterwave_checkout.save
         end
         attributes[:payments_attributes].first[:source] = flutterwave_checkout
@@ -90,7 +90,7 @@ module SpreeFlutterwave
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.nil? && payment_attributes.present?
         payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
-        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
+        flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
           flutterwave_checkout_attributes = {
@@ -98,7 +98,7 @@ module SpreeFlutterwave
             transaction_ref: number,
             status: 'pending'
           }
-          flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
+          flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.new(flutterwave_checkout_attributes)
           flutterwave_checkout.save
         end
 
@@ -113,7 +113,7 @@ module SpreeFlutterwave
       source_attributes = @updating_params[:source_attributes]
       if flutterwave_checkout? && source_attributes.present? && source_attributes[:flw_transaction_id]
         flw_transaction_id = source_attributes[:flw_transaction_id]
-        flutterwave_checkout = SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
+        flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number).last
         flutterwave_checkout.transaction_id = flw_transaction_id
         flutterwave_checkout.save
       end

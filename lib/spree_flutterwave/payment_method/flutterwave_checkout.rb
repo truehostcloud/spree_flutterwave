@@ -2,7 +2,7 @@ module SpreeFlutterwave
   module PaymentMethod
     class FlutterwaveCheckout < ::Spree::PaymentMethod
       def payment_source_class
-        SpreeFlutterwave::FlutterwaveCheckout
+        ::SpreeFlutterwave::FlutterwaveCheckout
       end
     end
   end
