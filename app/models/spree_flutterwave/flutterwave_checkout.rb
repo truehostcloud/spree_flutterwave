@@ -1,5 +1,5 @@
 module SpreeFlutterwave
-  class FlutterwaveCheckout < ApplicationRecord
+  class FlutterwaveCheckout < Spree.base_class
     self.table_name = 'spree_flutterwave_checkouts'
 
     attr_accessor :imported
