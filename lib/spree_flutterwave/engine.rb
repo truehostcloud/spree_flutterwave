@@ -7,7 +7,7 @@ module SpreeFlutterwave
     engine_name 'spree_flutterwave'
 
     config.after_initialize do |app|
-      app.config.spree.payment_methods << Spree::Gateway::Flutterwave
+      app.config.spree.payment_methods << Spree::Gateway::Flutterwave unless app.config.spree.payment_methods.include?(Spree::Gateway::Flutterwave)
     end
 
     # use rspec for tests
