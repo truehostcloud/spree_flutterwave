@@ -1,22 +1,69 @@
 module Spree
   module SpreeFlutterwave
     module PaymentsControllerDecorator
+      FLUTTERWAVE_SOURCE_ATTRIBUTES = %i[
+        transaction_ref
+        transaction_id
+        status
+        currency
+        amount
+        charged_amount
+        app_fee
+        merchant_fee
+        amount_settled
+        payment_type
+        auth_model
+        narration
+        raw_response
+      ].freeze
+
+      private
+
+      def load_data
+        super
+        @payment_method = selected_payment_method_for_admin_payment
+      end
+
+      def object_params
+        if params[:payment].present? && params[:payment_source].present?
+          source_params = params[:payment_source][params[:payment][:payment_method_id]]
+          params[:payment][:source_attributes] = source_params if source_params.present?
+        end
+
+        params.require(:payment).permit(
+          :amount,
+          :payment_method_id,
+          :payment_method,
+          source_attributes: permitted_source_attributes + FLUTTERWAVE_SOURCE_ATTRIBUTES
+        )
+      end
+
+      def selected_payment_method_for_admin_payment
+        return @payment.payment_method if defined?(@payment) && @payment&.payment_method.present?
+        return @payment_methods.first if params[:payment].blank? || params[:payment][:payment_method_id].blank?
+
+        payment_method_id = params[:payment][:payment_method_id].to_s
+        @payment_methods.find { |payment_method| payment_method.id.to_s == payment_method_id } || @payment_methods.first
+      end
+
+      public
+
       def create
         invoke_callbacks(:create, :before)
         begin
           if @payment_method.store_credit?
             Spree::Dependencies.checkout_add_store_credit_service.constantize.call(order: @order)
             payments = @order.payments.store_credits.valid
-          elsif @payment_method.is_a?(::Spree::Gateway::Flutterwave)
-            @payment ||= @order.payments.build(object_params)
-            @payment.save
-            payments = [@payment]
           else
-            @payment ||= @order.payments.build(object_params)
+            @payment = @object ||= model_class.new(order: @order)
+            @payment.attributes = object_params
+            @payment.build_source
+
             if @payment.payment_method.source_required? && params[:card].present? && params[:card] != 'new'
               @payment.source = @payment.payment_method.payment_source_class.find_by(id: params[:card])
             end
-            @payment.save
+
+            @payment.save!
             payments = [@payment]
           end
 
@@ -38,9 +85,9 @@ module Spree
             end
 
             flash[:success] = flash_message_for(saved_payments.first, :successfully_created)
-            redirect_to spree.admin_order_payments_path(@order)
+            redirect_to location_after_save
           else
-            @payment ||= @order.payments.build(object_params)
+            @payment ||= @object || model_class.new(order: @order)
             invoke_callbacks(:create, :fails)
             flash[:error] = Spree.t(:payment_could_not_be_created)
             render :new, status: :unprocessable_entity
@@ -49,6 +96,10 @@ module Spree
           invoke_callbacks(:create, :fails)
           flash[:error] = e.message.to_s
           redirect_to new_admin_order_payment_path(@order)
+        rescue ActiveRecord::RecordInvalid
+          invoke_callbacks(:create, :fails)
+          flash[:error] = @payment.errors.full_messages.to_sentence
+          render :new, status: :unprocessable_entity
         end
       end
     end

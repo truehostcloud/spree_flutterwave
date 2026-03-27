@@ -67,6 +67,8 @@ module SpreeFlutterwave
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.present? && payment_attributes.present?
         payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
+        return attributes if payment_method.nil?
+
         flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
@@ -90,6 +92,8 @@ module SpreeFlutterwave
       payment_attributes = attributes[:payments_attributes].first if attributes[:payments_attributes].present?
       if flutterwave_checkout? && user.nil? && payment_attributes.present?
         payment_method = store.payment_methods.find_by(type: 'Spree::Gateway::Flutterwave')
+        return attributes if payment_method.nil?
+
         flutterwave_checkout = ::SpreeFlutterwave::FlutterwaveCheckout.where(transaction_ref: number, payment_method_id: payment_method.id).last
 
         if flutterwave_checkout.nil?
@@ -125,6 +129,7 @@ module SpreeFlutterwave
 
     def flutterwave_in_payment_attributes?
       return false if @updating_params.nil?
+      return false if @updating_params[:order].nil?
 
       payment_attributes = @updating_params[:order][:payments_attributes]
       return false if payment_attributes.nil?

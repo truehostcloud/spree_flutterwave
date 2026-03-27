@@ -3,6 +3,7 @@ module Spree
     preference :public_key, :string
     preference :secret_key, :string
     preference :encryption_key, :string
+    preference :test_mode, :boolean, default: true
 
     def method_type
       'flutterwave'
