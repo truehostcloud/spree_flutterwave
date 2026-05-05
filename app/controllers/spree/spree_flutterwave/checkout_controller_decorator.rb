@@ -1,5 +1,5 @@
 module Spree
-  module Flutterwave
+  module SpreeFlutterwave
     module CheckoutControllerDecorator
       def self.prepended(base)
         base.before_action :load_flutterave_payment_method
@@ -19,4 +19,4 @@ module Spree
   end
 end
 
-::Spree::CheckoutController.prepend(::Spree::Flutterwave::CheckoutControllerDecorator)
+::Spree::CheckoutController.prepend(::Spree::SpreeFlutterwave::CheckoutControllerDecorator)
